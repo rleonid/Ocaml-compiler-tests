@@ -1,9 +1,7 @@
 
 let ml n = 
   let rec ml_acc acc i = 
-    if i < 0 
-    then acc 
-    else ml_acc (i::acc) (i - 1)
+    if i < 0 then acc else ml_acc (i::acc) (i - 1)
   in ml_acc [] n ;;
 
 let rec non_taily_ml n =
@@ -34,3 +32,8 @@ let ()   =
   let pre  = List.rev (List.tl (List.rev long)) in
   let res  = is_prefix long pre in
   Printf.printf "%B all done\n" res;;
+
+let () =
+  let h1 = Hashtbl.hash (ml 9) in
+  let h2 = Hashtbl.hash (ml 10) in
+  Printf.printf "%d\n%d\n" h1 h2
