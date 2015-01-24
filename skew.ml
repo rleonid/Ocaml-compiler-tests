@@ -31,6 +31,16 @@ let skew2b str =
   done;
   a
 
+(* What if we perform one addition instead of two subtractions? *)
+let skew2c str =
+  let n = String.length str in
+  let a = Array.make (n + 1) 0 in
+  for i = 0 to (n - 1) do
+    a.(i+1) <- update_skew_count a.(i) str.[i];
+  done;
+  a
+
+
 let skew2a str =
   let n = String.length str in
   let a = Array.make (n + 1) 0 in
@@ -66,39 +76,31 @@ let time f =
   let n = Time.now () in
   let r = f () in
   let s = Time.diff (Time.now ()) n in
-  Printf.printf "%f\n" (Core.Span.to_sec s);
-  r
+  let d = Core.Span.to_sec s in
+  (d, r)
+
+let prof n f =
+  let r = ref 0.0 in
+  let nf = Float.of_int n in
+  for i = 1 to n do
+    let (t, _) = time f in
+    r := !r +. (t /. nf);
+  done;
+  !r
+
 
 let () =
   let lst = In_channel.read_lines "TestFile.txt" in
   let sal = String.concat lst in
-  Printf.printf "skew ----\n";
-  let _ = time (fun () -> skew sal) |> ignore in
-  let _ = time (fun () -> skew sal) |> ignore in
-  let _ = time (fun () -> skew sal) |> ignore in
-  let _ = time (fun () -> skew sal) |> ignore in
-  Printf.printf "skew2 ----\n";
-  let _ = time (fun () -> skew2 sal) |> ignore in
-  let _ = time (fun () -> skew2 sal) |> ignore in
-  let _ = time (fun () -> skew2 sal) |> ignore in
-  let _ = time (fun () -> skew2 sal) |> ignore in
-  Printf.printf "skew2b ----\n";
-  let _ = time (fun () -> skew2b sal) |> ignore in
-  let _ = time (fun () -> skew2b sal) |> ignore in
-  let _ = time (fun () -> skew2b sal) |> ignore in
-  let _ = time (fun () -> skew2b sal) |> ignore in
- Printf.printf "skew2a ----\n";
-  let _ = time (fun () -> skew2a sal) |> ignore in
-  let _ = time (fun () -> skew2a sal) |> ignore in
-  let _ = time (fun () -> skew2a sal) |> ignore in
-  let _ = time (fun () -> skew2a sal) |> ignore in
-  Printf.printf "skew3 ----\n";
-  let _ = time (fun () -> skew3 sal) |> ignore in
-  let _ = time (fun () -> skew3 sal) |> ignore in
-  let _ = time (fun () -> skew3 sal) |> ignore in
-  let _ = time (fun () -> skew3 sal) |> ignore in
-  ()
+  let n   = 50 in
+  Printf.printf "skew:    %f \n" (prof n (fun () -> skew sal));
+  Printf.printf "skew2:   %f \n" (prof n (fun () -> skew2 sal));
+  Printf.printf "skew2c:  %f \n" (prof n (fun () -> skew2c sal));
+  Printf.printf "skew2b:  %f \n" (prof n (fun () -> skew2b sal));
+  Printf.printf "skew2a:  %f \n" (prof n (fun () -> skew2a sal));
+  Printf.printf "skew3:   %f \n" (prof n (fun () -> skew3 sal))
 
 (* Open questions:
   Why do the timings go up and down? Memory alignment/GC?
+  If I don't aggregate them in a profile
 *)
